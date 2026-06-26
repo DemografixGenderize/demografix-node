@@ -31,11 +31,13 @@ jobs:
       - run: npm run build
       - name: Publish to npm
         run: npm publish --provenance --access public
-        # npm OIDC Trusted Publishing: no NODE_AUTH_TOKEN needed.
-        # Fallback for accounts without OIDC: uncomment the env block below
-        # and add an NPM_TOKEN secret (see RELEASING.md).
-        # env:
-        #   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        # Auth via NPM_TOKEN. npm trusted publishing (OIDC) cannot be configured
+        # until the package exists, so the first release uses a token. After the
+        # package is live you may set up a trusted publisher on npmjs.com and
+        # remove this env block to publish tokenlessly. --provenance still works
+        # with a token because the job has id-token: write. See RELEASING.md.
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   github-release:
     needs: publish
