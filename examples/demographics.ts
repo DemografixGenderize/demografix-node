@@ -3,7 +3,7 @@
  *
  * Run a batch through each service, then aggregate the predictions into a
  * gender split, an age distribution, and a nationality mix. The output is a
- * summary of the group, not a label for any one person.
+ * summary of the group.
  *
  * Run: npx tsx examples/demographics.ts
  */
