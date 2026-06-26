@@ -26,7 +26,7 @@ import type {
 } from "./models.js";
 
 /** SDK version, stamped into the User-Agent. */
-const VERSION = "0.1.0";
+const VERSION = "0.1.1";
 
 /** User-Agent sent on every request. Hardcoded, not an option. */
 const USER_AGENT = `demografix-typescript/${VERSION}`;

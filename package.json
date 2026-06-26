@@ -1,6 +1,6 @@
 {
   "name": "demografix",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Official SDK for the Demografix APIs: genderize.io, agify.io, and nationalize.io.",
   "license": "MIT",
   "author": "Demografix",
@@ -14,7 +14,8 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist"

@@ -18,6 +18,9 @@ jobs:
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
+      - name: Upgrade npm for trusted publishing
+        # Trusted publishing (OIDC) needs npm >= 11.5.1; Node 22 ships npm 10.x.
+        run: npm install -g npm@latest
       - name: Verify tag matches package version
         run: |
           tag_version="${GITHUB_REF_NAME#v}"
@@ -30,14 +33,10 @@ jobs:
       - run: npm install
       - run: npm run build
       - name: Publish to npm
+        # Tokenless: npm trusted publishing (OIDC) via id-token: write. The
+        # package's trusted publisher on npmjs.com authorizes this repo +
+        # workflow + environment. Provenance is generated automatically.
         run: npm publish --provenance --access public
-        # Auth via NPM_TOKEN. npm trusted publishing (OIDC) cannot be configured
-        # until the package exists, so the first release uses a token. After the
-        # package is live you may set up a trusted publisher on npmjs.com and
-        # remove this env block to publish tokenlessly. --provenance still works
-        # with a token because the job has id-token: write. See RELEASING.md.
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   github-release:
     needs: publish
