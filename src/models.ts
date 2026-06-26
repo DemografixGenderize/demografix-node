@@ -96,8 +96,6 @@ export type NationalizeOptions = RequestOptions;
 
 /** Constructor options for {@link Demografix}. */
 export interface DemografixOptions {
-  /** API key sent as the `apikey` query parameter. Omit for the free per-IP tier. */
-  apiKey?: string;
   /** Request timeout in milliseconds. Defaults to 10000. */
   timeout?: number;
 }

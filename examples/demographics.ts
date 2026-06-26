@@ -13,7 +13,7 @@ import { Demografix } from "../src/index.js";
 const names = ["michael", "matthew", "jane", "nguyen", "kim", "peter"];
 
 async function main(): Promise<void> {
-  const client = new Demografix({ apiKey: process.env.DEMOGRAFIX_API_KEY });
+  const client = new Demografix(process.env.DEMOGRAFIX_API_KEY ?? "YOUR_API_KEY");
 
   const [genders, ages, nationalities] = await Promise.all([
     client.genderizeBatch(names),

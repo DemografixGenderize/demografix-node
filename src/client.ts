@@ -58,16 +58,27 @@ interface RawResponse {
 /**
  * Client for the three Demografix APIs.
  *
- * Construct once with an optional API key, then call any of the six methods.
- * Quota is read off the returned value or a raised error; it is never cached on
- * the client.
+ * Construct once with an API key, then call any of the six methods. The key is
+ * required: constructing without a non-empty key throws a {@link ValidationError}
+ * before any request. Quota is read off the returned value or a raised error; it
+ * is never cached on the client.
  */
 export class Demografix {
-  private readonly apiKey: string | undefined;
+  private readonly apiKey: string;
   private readonly timeout: number;
 
-  constructor(options: DemografixOptions = {}) {
-    this.apiKey = options.apiKey;
+  /**
+   * @param apiKey - The API key sent as the `apikey` query parameter on every
+   *   request. Required. A missing, empty, or blank key throws a
+   *   {@link ValidationError} before any HTTP call. The same key works across
+   *   all three services.
+   * @param options - Optional `timeout` in milliseconds (defaults to 10000).
+   */
+  constructor(apiKey: string, options: DemografixOptions = {}) {
+    if (typeof apiKey !== "string" || apiKey.trim() === "") {
+      throw new ValidationError("api_key is required");
+    }
+    this.apiKey = apiKey;
     this.timeout = options.timeout ?? DEFAULT_TIMEOUT;
   }
 
@@ -226,9 +237,7 @@ export class Demografix {
     if (countryId !== undefined) {
       params.set("country_id", countryId);
     }
-    if (this.apiKey !== undefined) {
-      params.set("apikey", this.apiKey);
-    }
+    params.set("apikey", this.apiKey);
     return url.toString();
   }
 

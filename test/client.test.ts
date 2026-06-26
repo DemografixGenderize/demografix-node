@@ -53,7 +53,7 @@ afterEach(() => {
 describe("single predictions parse fields and quota", () => {
   it("genderize", async () => {
     stubFetch(200, { count: 1352696, name: "peter", gender: "male", probability: 1.0 });
-    const result = await new Demografix().genderize("peter");
+    const result = await new Demografix("test-key").genderize("peter");
     expect(result.name).toBe("peter");
     expect(result.gender).toBe("male");
     expect(result.probability).toBe(1.0);
@@ -64,7 +64,7 @@ describe("single predictions parse fields and quota", () => {
 
   it("agify", async () => {
     stubFetch(200, { count: 311558, name: "michael", age: 57 });
-    const result = await new Demografix().agify("michael");
+    const result = await new Demografix("test-key").agify("michael");
     expect(result.age).toBe(57);
     expect(result.count).toBe(311558);
     expect(result.quota.remaining).toBe(24987);
@@ -79,7 +79,7 @@ describe("single predictions parse fields and quota", () => {
         { country_id: "MO", probability: 0.019031 },
       ],
     });
-    const result = await new Demografix().nationalize("nguyen");
+    const result = await new Demografix("test-key").nationalize("nguyen");
     expect(result.country).toHaveLength(2);
     expect(result.country[0]).toEqual({ countryId: "VN", probability: 0.891132 });
     expect(result.quota.remaining).toBe(24987);
@@ -92,7 +92,7 @@ describe("batch", () => {
       { count: 311558, name: "michael", age: 57 },
       { count: 55682, name: "matthew", age: 48 },
     ]);
-    const batch = await new Demografix().agifyBatch(["michael", "matthew"]);
+    const batch = await new Demografix("test-key").agifyBatch(["michael", "matthew"]);
     expect(batch.results.map((r) => r.name)).toEqual(["michael", "matthew"]);
     expect(batch.results.map((r) => r.age)).toEqual([57, 48]);
     expect(batch.quota.remaining).toBe(24987);
@@ -103,7 +103,7 @@ describe("batch", () => {
       { count: 311558, name: "michael", age: 57 },
       { count: 55682, name: "matthew", age: 48 },
     ]);
-    await new Demografix().agifyBatch(["michael", "matthew"]);
+    await new Demografix("test-key").agifyBatch(["michael", "matthew"]);
     const url = new URL(fetch.url());
     expect(url.searchParams.getAll("name[]")).toEqual(["michael", "matthew"]);
     expect(url.searchParams.has("name")).toBe(false);
@@ -111,7 +111,7 @@ describe("batch", () => {
 
   it("sends a single name parameter for single calls", async () => {
     const fetch = stubFetch(200, { count: 1352696, name: "peter", gender: "male", probability: 1.0 });
-    await new Demografix().genderize("peter");
+    await new Demografix("test-key").genderize("peter");
     const url = new URL(fetch.url());
     expect(url.searchParams.get("name")).toBe("peter");
     expect(url.searchParams.has("name[]")).toBe(false);
@@ -121,7 +121,7 @@ describe("batch", () => {
 describe("null predictions are normal results", () => {
   it("genderize null", async () => {
     stubFetch(200, { name: "xÿz", gender: null, probability: 0.0, count: 0 });
-    const result = await new Demografix().genderize("xÿz");
+    const result = await new Demografix("test-key").genderize("xÿz");
     expect(result.gender).toBeNull();
     expect(result.probability).toBe(0.0);
     expect(result.count).toBe(0);
@@ -129,13 +129,13 @@ describe("null predictions are normal results", () => {
 
   it("agify null", async () => {
     stubFetch(200, { name: "xÿz", age: null, count: 0 });
-    const result = await new Demografix().agify("xÿz");
+    const result = await new Demografix("test-key").agify("xÿz");
     expect(result.age).toBeNull();
   });
 
   it("nationalize null", async () => {
     stubFetch(200, { name: "xÿz", country: [], count: 0 });
-    const result = await new Demografix().nationalize("xÿz");
+    const result = await new Demografix("test-key").nationalize("xÿz");
     expect(result.country).toEqual([]);
   });
 });
@@ -149,7 +149,7 @@ describe("country_id", () => {
       country_id: "US",
       probability: 0.94,
     });
-    const result = await new Demografix().genderize("kim", { countryId: "US" });
+    const result = await new Demografix("test-key").genderize("kim", { countryId: "US" });
     const url = new URL(fetch.url());
     expect(url.searchParams.get("country_id")).toBe("US");
     expect(result.countryId).toBe("US");
@@ -158,22 +158,38 @@ describe("country_id", () => {
 
   it("is omitted from the request when not set", async () => {
     const fetch = stubFetch(200, { count: 1352696, name: "peter", gender: "male", probability: 1.0 });
-    await new Demografix().genderize("peter");
+    await new Demografix("test-key").genderize("peter");
     expect(new URL(fetch.url()).searchParams.has("country_id")).toBe(false);
   });
 });
 
 describe("apikey", () => {
-  it("is sent when configured", async () => {
+  it("is sent on every request", async () => {
     const fetch = stubFetch(200, { count: 1352696, name: "peter", gender: "male", probability: 1.0 });
-    await new Demografix({ apiKey: "secret" }).genderize("peter");
+    await new Demografix("secret").genderize("peter");
     expect(new URL(fetch.url()).searchParams.get("apikey")).toBe("secret");
   });
+});
 
-  it("is omitted in the free tier", async () => {
-    const fetch = stubFetch(200, { count: 1352696, name: "peter", gender: "male", probability: 1.0 });
-    await new Demografix().genderize("peter");
-    expect(new URL(fetch.url()).searchParams.has("apikey")).toBe(false);
+describe("required api key", () => {
+  it("throws ValidationError when omitted, with no HTTP call", async () => {
+    const fetch = vi.fn();
+    vi.stubGlobal("fetch", fetch);
+    // The key is a required parameter; omitting it is a client-side error.
+    expect(() => new (Demografix as unknown as new () => Demografix)()).toThrow(
+      ValidationError,
+    );
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("throws ValidationError for an empty or blank key, with no HTTP call", () => {
+    const fetch = vi.fn();
+    vi.stubGlobal("fetch", fetch);
+    for (const key of ["", "   "]) {
+      expect(() => new Demografix(key)).toThrow(ValidationError);
+      expect(() => new Demografix(key)).toThrow("api_key is required");
+    }
+    expect(fetch).not.toHaveBeenCalled();
   });
 });
 
@@ -182,14 +198,14 @@ describe("client-side batch validation", () => {
     const fetch = vi.fn();
     vi.stubGlobal("fetch", fetch);
     const names = Array.from({ length: 11 }, (_, i) => `name${i}`);
-    await expect(new Demografix().genderizeBatch(names)).rejects.toBeInstanceOf(ValidationError);
+    await expect(new Demografix("test-key").genderizeBatch(names)).rejects.toBeInstanceOf(ValidationError);
     expect(fetch).not.toHaveBeenCalled();
   });
 
   it("allows exactly 10 names", async () => {
     const fetch = stubFetch(200, Array.from({ length: 10 }, (_, i) => ({ name: `n${i}`, age: i, count: 1 })));
     const names = Array.from({ length: 10 }, (_, i) => `n${i}`);
-    const batch = await new Demografix().agifyBatch(names);
+    const batch = await new Demografix("test-key").agifyBatch(names);
     expect(batch.results).toHaveLength(10);
     expect(fetch.url()).not.toBe("");
   });
@@ -206,7 +222,7 @@ describe("error mapping", () => {
   for (const [status, message, type] of cases) {
     it(`maps ${status} to ${type.name}`, async () => {
       stubFetch(status, { error: message });
-      const err = await rejection(new Demografix().genderize("peter"));
+      const err = await rejection(new Demografix("test-key").genderize("peter"));
       expect(err).toBeInstanceOf(type);
       expect(err).toBeInstanceOf(DemografixError);
       expect(err.status).toBe(status);
@@ -216,14 +232,14 @@ describe("error mapping", () => {
 
   it("attaches quota to a 429", async () => {
     stubFetch(429, { error: "Request limit reached" });
-    const err = await rejection<RateLimitError>(new Demografix().genderize("peter"));
+    const err = await rejection<RateLimitError>(new Demografix("test-key").genderize("peter"));
     expect(err).toBeInstanceOf(RateLimitError);
     expect(err.quota).toEqual({ limit: 25000, remaining: 24987, reset: 1314000 });
   });
 
   it("maps an unmapped non-2xx status to the base error", async () => {
     stubFetch(500, { error: "Internal error" });
-    const err = await rejection(new Demografix().genderize("peter"));
+    const err = await rejection(new Demografix("test-key").genderize("peter"));
     expect(err.constructor).toBe(DemografixError);
     expect(err.status).toBe(500);
   });
@@ -237,7 +253,7 @@ describe("cancellation", () => {
       return Promise.resolve(response(200, { name: "peter", gender: "male", probability: 1.0, count: 1 }));
     });
     const controller = new AbortController();
-    await new Demografix().genderize("peter", { signal: controller.signal });
+    await new Demografix("test-key").genderize("peter", { signal: controller.signal });
     expect(signals.at(-1)).toBeInstanceOf(AbortSignal);
   });
 
@@ -255,7 +271,7 @@ describe("cancellation", () => {
     });
     const reason = new Error("caller cancelled");
     const err = await rejection(
-      new Demografix().genderize("peter", { signal: AbortSignal.abort(reason) }),
+      new Demografix("test-key").genderize("peter", { signal: AbortSignal.abort(reason) }),
     );
     // The caller's own abort reason propagates as-is, the way fetch does it.
     expect(err).toBe(reason);
@@ -264,7 +280,7 @@ describe("cancellation", () => {
 
   it("surfaces a TransportError on a network failure", async () => {
     vi.stubGlobal("fetch", () => Promise.reject(new TypeError("network down")));
-    const err = await rejection(new Demografix().genderize("peter"));
+    const err = await rejection(new Demografix("test-key").genderize("peter"));
     expect(err).toBeInstanceOf(TransportError);
     expect(err.status).toBeUndefined();
     expect(err.quota).toBeNull();
@@ -286,7 +302,7 @@ describe("quota header parsing is case-insensitive", () => {
         }),
       ),
     );
-    const result = await new Demografix().genderize("peter");
+    const result = await new Demografix("test-key").genderize("peter");
     expect(result.quota.remaining).toBe(24987);
   });
 });

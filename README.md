@@ -1,6 +1,6 @@
 # Demografix TypeScript SDK
 
-Predict gender, age, and nationality across a list of names from one client, and read the remaining quota carried on every response. One package covers genderize.io, agify.io, and nationalize.io.
+Run demographic analysis over names — predicted gender, age, and nationality — from one client. The package covers genderize.io, agify.io, and nationalize.io.
 
 ## Install
 
@@ -17,7 +17,7 @@ Construct a client, run a batch over a list of names, read the predictions, and 
 ```ts
 import { Demografix } from "demografix";
 
-const client = new Demografix({ apiKey: process.env.DEMOGRAFIX_API_KEY });
+const client = new Demografix(process.env.DEMOGRAFIX_API_KEY ?? "YOUR_API_KEY");
 
 const names = ["michael", "matthew", "jane"];
 const ages = await client.agifyBatch(names);
@@ -34,7 +34,7 @@ console.log(distribution);          // { "40s": 1, "50s": 1, "20s": 1 }
 console.log(ages.quota.remaining);  // 24987
 ```
 
-The API key is optional. Without it, requests use the free per-IP tier. One key works across all three services and shares one quota.
+An API key is required. Creating one is free and includes 2,500 requests per month. Generate a key in your dashboard at genderize.io, agify.io, or nationalize.io. One key works across all three services.
 
 ## genderize
 
@@ -177,7 +177,7 @@ When the caller's signal aborts first, its abort reason propagates as-is, the wa
 | `nationalize(name, options?)` | `NationalizeResult` | no |
 | `nationalizeBatch(names, options?)` | `Batch<NationalizePrediction>` | no |
 
-All methods are async and return a Promise. Every method's `options` takes an optional `signal` (`AbortSignal`) for cancellation; genderize and agify also take `countryId`. The constructor takes `{ apiKey?, timeout? }`; `timeout` defaults to 10000 milliseconds. Base URLs and the User-Agent are fixed constants, not options.
+All methods are async and return a Promise. Every method's `options` takes an optional `signal` (`AbortSignal`) for cancellation; genderize and agify also take `countryId`. The constructor takes `new Demografix(apiKey, { timeout? })`; `apiKey` is required and `timeout` defaults to 10000 milliseconds. Base URLs and the User-Agent are fixed constants, not options.
 
 ## Reference
 
