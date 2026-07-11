@@ -1,6 +1,6 @@
 {
   "name": "demografix",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Official SDK for the Demografix APIs: genderize.io, agify.io, and nationalize.io.",
   "license": "MIT",
   "author": "Demografix",
