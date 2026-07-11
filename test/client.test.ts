@@ -118,6 +118,37 @@ describe("batch", () => {
   });
 });
 
+describe("a one-name batch still sends name[] and parses a one-element array", () => {
+  it("genderizeBatch with one name", async () => {
+    const fetch = stubFetch(200, [{ count: 1352696, name: "peter", gender: "male", probability: 1.0 }]);
+    const batch = await new Demografix("test-key").genderizeBatch(["peter"]);
+    expect(batch.results.map((r) => r.gender)).toEqual(["male"]);
+    const url = new URL(fetch.url());
+    expect(url.searchParams.getAll("name[]")).toEqual(["peter"]);
+    expect(url.searchParams.has("name")).toBe(false);
+  });
+
+  it("agifyBatch with one name", async () => {
+    const fetch = stubFetch(200, [{ count: 311558, name: "michael", age: 57 }]);
+    const batch = await new Demografix("test-key").agifyBatch(["michael"]);
+    expect(batch.results.map((r) => r.age)).toEqual([57]);
+    const url = new URL(fetch.url());
+    expect(url.searchParams.getAll("name[]")).toEqual(["michael"]);
+    expect(url.searchParams.has("name")).toBe(false);
+  });
+
+  it("nationalizeBatch with one name", async () => {
+    const fetch = stubFetch(200, [
+      { count: 100783, name: "nguyen", country: [{ country_id: "VN", probability: 0.891132 }] },
+    ]);
+    const batch = await new Demografix("test-key").nationalizeBatch(["nguyen"]);
+    expect(batch.results.map((r) => r.name)).toEqual(["nguyen"]);
+    const url = new URL(fetch.url());
+    expect(url.searchParams.getAll("name[]")).toEqual(["nguyen"]);
+    expect(url.searchParams.has("name")).toBe(false);
+  });
+});
+
 describe("null predictions are normal results", () => {
   it("genderize null", async () => {
     stubFetch(200, { name: "xÿz", gender: null, probability: 0.0, count: 0 });

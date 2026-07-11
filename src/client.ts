@@ -26,7 +26,7 @@ import type {
 } from "./models.js";
 
 /** SDK version, stamped into the User-Agent. */
-const VERSION = "0.1.1";
+const VERSION = "0.1.2";
 
 /** User-Agent sent on every request. Hardcoded, not an option. */
 const USER_AGENT = `demografix-typescript/${VERSION}`;
@@ -115,7 +115,7 @@ export class Demografix {
     options: GenderizeOptions = {},
   ): Promise<Batch<GenderizePrediction>> {
     this.assertBatchSize(names);
-    const { json, quota } = await this.request("genderize", names, options);
+    const { json, quota } = await this.request("genderize", names, options, true);
     return { results: asArray(json).map(parseGenderize), quota };
   }
 
@@ -146,7 +146,7 @@ export class Demografix {
     options: AgifyOptions = {},
   ): Promise<Batch<AgifyPrediction>> {
     this.assertBatchSize(names);
-    const { json, quota } = await this.request("agify", names, options);
+    const { json, quota } = await this.request("agify", names, options, true);
     return { results: asArray(json).map(parseAgify), quota };
   }
 
@@ -180,7 +180,7 @@ export class Demografix {
     options: NationalizeOptions = {},
   ): Promise<Batch<NationalizePrediction>> {
     this.assertBatchSize(names);
-    const { json, quota } = await this.request("nationalize", names, options);
+    const { json, quota } = await this.request("nationalize", names, options, true);
     return { results: asArray(json).map(parseNationalize), quota };
   }
 
@@ -200,8 +200,9 @@ export class Demografix {
     service: Service,
     names: string[],
     options: { countryId?: string; signal?: AbortSignal },
+    batch = false,
   ): Promise<{ json: unknown; quota: Quota }> {
-    const url = this.buildUrl(service, names, options.countryId);
+    const url = this.buildUrl(service, names, options.countryId, batch);
     const raw = await this.send(url, options.signal);
     const quota = parseQuota(raw.headers);
 
@@ -223,16 +224,23 @@ export class Demografix {
     return { json: body, quota };
   }
 
-  /** Build the request URL with repeated `name[]` for batches, `name` for one. */
-  private buildUrl(service: Service, names: string[], countryId?: string): string {
+  /** Build the request URL: `name` for a single call, repeated `name[]` for a batch. */
+  private buildUrl(
+    service: Service,
+    names: string[],
+    countryId: string | undefined,
+    batch: boolean,
+  ): string {
     const url = new URL(BASE_URLS[service]);
     const params = url.searchParams;
-    if (names.length === 1) {
-      params.set("name", names[0]!);
-    } else {
+    if (batch) {
+      // Always name[], even for one name: the API keys its response shape on
+      // the parameter form, and a batch call must get an array back.
       for (const n of names) {
         params.append("name[]", n);
       }
+    } else {
+      params.set("name", names[0]!);
     }
     if (countryId !== undefined) {
       params.set("country_id", countryId);
