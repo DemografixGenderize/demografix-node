@@ -225,19 +225,19 @@ describe("required api key", () => {
 });
 
 describe("client-side batch validation", () => {
-  it("raises ValidationError for 11 names with no HTTP call", async () => {
+  it("raises ValidationError for 101 names with no HTTP call", async () => {
     const fetch = vi.fn();
     vi.stubGlobal("fetch", fetch);
-    const names = Array.from({ length: 11 }, (_, i) => `name${i}`);
+    const names = Array.from({ length: 101 }, (_, i) => `name${i}`);
     await expect(new Demografix("test-key").genderizeBatch(names)).rejects.toBeInstanceOf(ValidationError);
     expect(fetch).not.toHaveBeenCalled();
   });
 
-  it("allows exactly 10 names", async () => {
-    const fetch = stubFetch(200, Array.from({ length: 10 }, (_, i) => ({ name: `n${i}`, age: i, count: 1 })));
-    const names = Array.from({ length: 10 }, (_, i) => `n${i}`);
+  it("allows exactly 100 names", async () => {
+    const fetch = stubFetch(200, Array.from({ length: 100 }, (_, i) => ({ name: `n${i}`, age: i, count: 1 })));
+    const names = Array.from({ length: 100 }, (_, i) => `n${i}`);
     const batch = await new Demografix("test-key").agifyBatch(names);
-    expect(batch.results).toHaveLength(10);
+    expect(batch.results).toHaveLength(100);
     expect(fetch.url()).not.toBe("");
   });
 });

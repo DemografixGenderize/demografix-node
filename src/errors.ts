@@ -32,7 +32,7 @@ export class SubscriptionError extends DemografixError {}
 
 /**
  * Raised on 422, and client-side before any HTTP call when a batch exceeds
- * ten names.
+ * 100 names.
  */
 export class ValidationError extends DemografixError {}
 

@@ -1,7 +1,7 @@
 {
   "name": "demografix",
-  "version": "0.1.2",
-  "description": "Official SDK for the Demografix APIs: genderize.io, agify.io, and nationalize.io.",
+  "version": "0.2.0",
+  "description": "Predict gender, age, and nationality from first names. Official client for the genderize.io, agify.io, and nationalize.io APIs, with batches of up to 100 names per request.",
   "license": "MIT",
   "author": "Demografix",
   "type": "module",
@@ -32,13 +32,25 @@
     "url": "https://github.com/DemografixGenderize/demografix-node/issues"
   },
   "keywords": [
-    "demografix",
+    "gender",
+    "age",
+    "nationality",
+    "name",
+    "first name",
+    "gender detection",
+    "gender from name",
+    "gender api",
+    "age prediction",
+    "name prediction",
+    "demographics",
+    "batch",
+    "bulk",
+    "api",
+    "api client",
     "genderize",
     "agify",
     "nationalize",
-    "gender",
-    "age",
-    "nationality"
+    "demografix"
   ],
   "scripts": {
     "build": "tsup",

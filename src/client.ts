@@ -26,7 +26,7 @@ import type {
 } from "./models.js";
 
 /** SDK version, stamped into the User-Agent. */
-const VERSION = "0.1.2";
+const VERSION = "0.2.0";
 
 /** User-Agent sent on every request. Hardcoded, not an option. */
 const USER_AGENT = `demografix-typescript/${VERSION}`;
@@ -39,7 +39,7 @@ const BASE_URLS = {
 } as const;
 
 /** Maximum names accepted in a single batch request. */
-const MAX_BATCH = 10;
+const MAX_BATCH = 100;
 
 /** Default request timeout in milliseconds. */
 const DEFAULT_TIMEOUT = 10000;
@@ -102,9 +102,9 @@ export class Demografix {
   }
 
   /**
-   * Predict gender for up to ten names, returning one quota for the batch.
+   * Predict gender for up to 100 names, returning one quota for the batch.
    *
-   * @param names - The names to classify. More than ten throws a
+   * @param names - The names to classify. More than 100 throws a
    *   {@link ValidationError} before any request is made.
    * @param options - Optional `countryId` to scope the predictions and `signal`
    *   to cancel the request.
@@ -133,9 +133,9 @@ export class Demografix {
   }
 
   /**
-   * Predict age for up to ten names, returning one quota for the batch.
+   * Predict age for up to 100 names, returning one quota for the batch.
    *
-   * @param names - The names to classify. More than ten throws a
+   * @param names - The names to classify. More than 100 throws a
    *   {@link ValidationError} before any request is made.
    * @param options - Optional `countryId` to scope the predictions and `signal`
    *   to cancel the request.
@@ -167,9 +167,9 @@ export class Demografix {
   }
 
   /**
-   * Predict nationality for up to ten names, returning one quota for the batch.
+   * Predict nationality for up to 100 names, returning one quota for the batch.
    *
-   * @param names - The names to classify. More than ten throws a
+   * @param names - The names to classify. More than 100 throws a
    *   {@link ValidationError} before any request is made.
    * @param options - Optional `signal` to cancel the request. Nationalize takes
    *   no country.
