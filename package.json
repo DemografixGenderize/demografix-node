@@ -1,7 +1,7 @@
 {
   "name": "demografix",
   "version": "0.2.0",
-  "description": "Predict gender, age, and nationality from first names. Official client for the genderize.io, agify.io, and nationalize.io APIs, with batches of up to 100 names per request.",
+  "description": "Predict gender, age, and nationality from names. Official client for the genderize.io, agify.io, and nationalize.io APIs, with batches of up to 100 names per request.",
   "license": "MIT",
   "author": "Demografix",
   "type": "module",

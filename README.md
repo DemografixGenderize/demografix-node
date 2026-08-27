@@ -1,6 +1,6 @@
 # Demografix TypeScript SDK
 
-Predict gender, age, and nationality from first names. One client covers all three Demografix APIs —
+Predict gender, age, and nationality from names. One client covers all three Demografix APIs —
 [genderize.io](https://genderize.io) (gender), [agify.io](https://agify.io) (age), and
 [nationalize.io](https://nationalize.io) (nationality) — with single-name lookups and batches of up
 to 100 names per request.
@@ -46,7 +46,7 @@ console.log(ages.quota.remaining);  // 24987
 
 ## genderize
 
-Predict gender. A single call returns the prediction fields plus a `quota`.
+Predict gender from names. A single call returns the prediction fields plus a `quota`.
 
 ```ts
 const g = await client.genderize("peter");
@@ -72,7 +72,7 @@ successful response, not an error.
 
 ## agify
 
-Predict age.
+Predict age from names.
 
 ```ts
 const a = await client.agify("michael");
@@ -86,7 +86,7 @@ const mean =
 
 ## nationalize
 
-Predict nationality. Each prediction carries up to five candidate countries in descending probability.
+Predict nationality from names. Each prediction carries up to five candidate countries in descending probability.
 
 ```ts
 const n = await client.nationalize("nguyen");
